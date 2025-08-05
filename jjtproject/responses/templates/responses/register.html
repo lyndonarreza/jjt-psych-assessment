@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Examinee Registration</title>
+</head>
+<body>
+    <h2>Examinee Registration Form</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save and Continue</button>
+    </form>
+</body>
+</html>

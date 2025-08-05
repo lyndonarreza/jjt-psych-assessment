@@ -1,0 +1,38 @@
+<!-- exams/templates/exams/take_exam.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Take Exam</title>
+</head>
+<body>
+    <h1>Take Exam: {{ exam.name }}</h1>
+    
+    {% if mcq_questions %}
+        <h2>Multiple Choice Questions</h2>
+        {% for question in mcq_questions %}
+            <div>
+                <p><strong>{{ question.text }}</strong></p>
+                <ul>
+                    {% for choice in question.choices %}
+                        <li>{{ choice }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if likert_questions %}
+        <h2>Likert Scale Questions</h2>
+        {% for question in likert_questions %}
+            <div>
+                <p><strong>{{ question.text }}</strong></p>
+                <ul>
+                    {% for option in question.options %}
+                        <li>{{ option }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

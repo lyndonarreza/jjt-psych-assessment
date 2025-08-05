@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Create Examineea Accounts{% endblock %}
+
+{% block content %}
+  <h1>Create Examinee Accounts</h1>
+
+  <form method="post" style="max-width: 600px;">
+    {% csrf_token %}
+    <table>
+      {{ form.as_table }}
+    </table>
+
+    <div class="submit-row">
+      <input type="submit" value="Create Accounts" class="default">
+      <a href=".." class="button">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

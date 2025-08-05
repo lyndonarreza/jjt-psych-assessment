@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Examinee Registration</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 30px;
+    }
+
+    .container {
+      width: 960px;
+      margin: auto;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 30px;
+      display: flex;
+      position: relative;
+    }
+
+    h3, h4 {
+      color: #0066cc;
+      margin-top: 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    .form-section {
+      width: 50%;
+      padding: 15px;
+    }
+
+    .checkbox {
+      margin-top: 8px;
+    }
+
+    .submit-btn {
+      margin-top: 25px;
+      padding: 12px 30px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .note {
+      position: absolute;
+      top: -20px;
+      right: -30px;
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      font-size: 13px;
+      border-radius: 5px;
+      width: 230px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .note::before {
+      content: "📌";
+      margin-right: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="note">
+    <strong>NOTE:</strong><br>
+    You can modify your record if needed.<br>
+    Click the continue button to proceed with your exam.
+  </div>
+
+  <form method="post" id="registration-form" style="display: flex; width: 100%;">
+    {% csrf_token %}
+
+    <div class="form-section">
+      <h3>Please Enter Your Details</h3>
+
+      <label for="id_first_name">First Name</label>
+      {{ form.first_name }}
+
+      <label for="id_middle_name">Middle Name</label>
+      {{ form.middle_name }}
+      <div class="checkbox">
+        <input type="checkbox" id="not_applicable"> <label for="not_applicable">Not Applicable</label>
+      </div>
+
+      <label for="id_last_name">Last Name</label>
+      {{ form.last_name }}
+
+      <label for="id_gender">Gender</label>
+      {{ form.gender }}
+
+      <label for="id_birthdate">Birthdate</label>
+      {{ form.birthdate }}
+
+      <label for="id_civil_status">Civil Status</label>
+      {{ form.civil_status }}
+
+      <h4>Address Info</h4>
+      <label for="id_country">Country</label>
+      {{ form.country }}
+
+      <label for="id_street_name">Street Name</label>
+      {{ form.street_name }}
+
+      <label for="id_city">City/Town</label>
+      {{ form.city }}
+
+      <label for="id_province">Province/State</label>
+      {{ form.province }}
+
+      <label for="id_zip_code">Zip Code</label>
+      {{ form.zip_code }}
+    </div>
+
+    <div class="form-section">
+      <h4>Contact Info</h4>
+      <label for="id_contact_number">Contact Number</label>
+      {{ form.contact_number }}
+
+      <label for="id_email">Email Address</label>
+      {{ form.email }}
+
+      <h4>Educational Background</h4>
+      <label for="id_highest_education_level">Highest Education Level</label>
+      {{ form.highest_education_level }}
+
+      <label for="id_course">Course</label>
+      {{ form.course }}
+
+      <label for="id_school">School</label>
+      {{ form.school }}
+
+      <h4>Target Position / Level</h4>
+      <label for="id_position">Position</label>
+      {{ form.position }}
+
+      <label for="id_level">Level</label>
+      {{ form.level }}
+
+      <button type="submit" class="submit-btn">Continue &gt;&gt;&gt;</button>
+    </div>
+  </form>
+</div>
+<script>
+document.getElementById('not_applicable').addEventListener('change', function () {
+    const middleInput = document.getElementById('id_middle_name');
+    if (this.checked) {
+        middleInput.value = '';
+        middleInput.disabled = true;
+    } else {
+        middleInput.disabled = false;
+    }
+});
+
+document.getElementById('registration-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch("{% url 'examinee_registration' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Registration saved successfully! Redirecting to instructions...");
+            window.location.href = "{% url 'exam_instructions' %}";
+        } else {
+            alert("Something went wrong. Please try again.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Server error. Please try again.");
+    });
+});
+</script>
+
+</body>
+</html>

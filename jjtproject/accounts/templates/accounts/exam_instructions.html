@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exam Instructions</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: rgba(0, 0, 0, 0.7);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-box {
+      background: #fff;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      text-align: center;
+    }
+
+    .modal-box h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .modal-box p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .scale-list {
+      text-align: left;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+
+    .scale-list li {
+      margin-bottom: 6px;
+      color: #444;
+    }
+
+    .start-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .start-btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="modal-box">
+    <h2>Before You Begin</h2>
+    <p>You are about to take a personality questionnaire designed to assess how you think, feel, and behave in different work-related situations.</p>
+    <p>Please rate each statement based on your agreement using the following scale:</p>
+
+    <ul class="scale-list">
+      <li><strong>5</strong> – Strongly Agree</li>
+      <li><strong>4</strong> – Agree</li>
+      <li><strong>3</strong> – Neutral</li>
+      <li><strong>2</strong> – Disagree</li>
+      <li><strong>1</strong> – Strongly Disagree</li>
+    </ul>
+
+    <p>Your responses will help determine the best fit for a role or program. Answer honestly and don’t overthink.</p>
+
+    <button type="button" class="start-btn" onclick="startExam()">Start Test</button>
+  </div>
+
+  <script>
+    function startExam() {
+      window.location.href = "{% url 'list_exams' %}";
+    }
+  </script>
+
+</body>
+</html>

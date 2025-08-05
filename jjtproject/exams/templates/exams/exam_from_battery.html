@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ exam.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f7f7f7;
+        }
+        .question-block {
+            background-color: #fff;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .options {
+            margin-left: 20px;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            background: #333;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+        .pagination {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .pagination button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .pagination button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h2>{{ exam.title }}</h2>
+    <div class="timer" id="timer">02:00</div>
+
+    <form method="post" id="examForm">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="question-block">
+                <div class="question-text">
+                    {{ forloop.counter }}. 
+                    {% if question.text %}{{ question.text }}
+                    {% elif question.question_text %}{{ question.question_text }}
+                    {% endif %}
+                </div>
+                <div class="options">
+                    {% if question._meta.model_name == 'likertquestion' %}
+                        {% for option in question.scale.options.all %}
+                            <label><input type="radio" name="q_{{ question.id }}" value="{{ option.value }}"> {{ option.label }}</label>
+                        {% endfor %}
+                    {% elif question._meta.model_name == 'mcqquestion' %}
+                        {% for choice in question.mcqchoice_set.all %}
+                            <label><input type="radio" name="q_{{ question.id }}" value="{{ choice.id }}"> {{ choice.choice_text }}</label>
+                        {% endfor %}
+                    {% elif question._meta.model_name == 'truefalsequestion' %}
+                        <label><input type="radio" name="q_{{ question.id }}" value="True"> True</label>
+                        <label><input type="radio" name="q_{{ question.id }}" value="False"> False</label>
+                    {% elif question._meta.model_name == 'essayquestion' %}
+                        <textarea name="q_{{ question.id }}" rows="4" cols="60" placeholder="Type your answer here..."></textarea>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="pagination">
+            <button type="submit">Next</button>
+        </div>
+    </form>
+
+    <script>
+        let duration = 2 * 60; // 2 minutes in seconds
+        const timerEl = document.getElementById('timer');
+        const form = document.getElementById('examForm');
+
+        const interval = setInterval(() => {
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            if (duration === 0) {
+                clearInterval(interval);
+                form.submit();
+            }
+            duration--;
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Exam System</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+  <!-- Your custom styles (optional) -->
+  <link rel="stylesheet" href="{% static 'css/exam_style.css' %}">
+
+  <!-- Bootstrap JS (optional, if you need dropdowns, modals, etc.) -->
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</head>
+<body>
+  {% block content %}
+  <!-- Content from child templates will appear here -->
+  {% endblock %}
+</body>
+</html>

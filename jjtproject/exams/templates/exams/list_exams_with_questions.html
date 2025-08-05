@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Available Exams for Your Assigned Battery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 40px;
+        }
+
+        .exam-section {
+            background: #fff;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .exam-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .question-type {
+            font-weight: bold;
+            margin-top: 15px;
+            color: #333;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .start-btn {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .start-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Available Exams for Your Assigned Battery</h2>
+
+{% if exam_data %}
+    {% for item in exam_data %}
+        <div class="exam-section">
+            <div class="exam-title">{{ item.exam.title }}</div>
+
+            {% if item.mcq_questions %}
+                <div class="question-type">Multiple Choice Questions:</div>
+                <ul>
+                    {% for q in item.mcq_questions %}
+                        <li>{{ q.question_text }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if item.likert_questions %}
+                <div class="question-type">Likert Questions:</div>
+                <ul>
+                    {% for q in item.likert_questions %}
+                        <li>{{ q.text }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if item.essay_questions %}
+                <div class="question-type">Essay Questions:</div>
+                <ul>
+                    {% for q in item.essay_questions %}
+                        <li>{{ q.text|truncatewords:12 }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if item.truefalse_questions %}
+                <div class="question-type">True/False Questions:</div>
+                <ul>
+                    {% for q in item.truefalse_questions %}
+                        <li>{{ q.question_text }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <a class="start-btn" href="{% url 'take_exam' item.exam.id %}">Start Exam</a>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No exams found for your battery assignment.</p>
+{% endif %}
+
+</body>
+</html>

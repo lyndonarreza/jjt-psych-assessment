@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Available Exams for Your Assigned Battery</h2>
+<ul>
+  {% for exam in exams %}
+    <li>
+      <strong>{{ exam.title }}</strong> -
+      <a href="{% url 'exam_questions' exam.id %}">Start Exam</a>
+    </li>
+  {% empty %}
+    <li>No exams available for your battery.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

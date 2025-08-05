@@ -1,0 +1,18 @@
+<!-- templates/accounts/login.html -->
+<h2>Examinee Login</h2>
+<form method="post">
+  {% csrf_token %}
+  <label for="username">Username:</label>
+  <input type="text" name="username" required><br>
+
+  <label for="password">Password:</label>
+  <input type="password" name="password" required><br>
+
+  <button type="submit">Login</button>
+</form>
+
+{% if messages %}
+  {% for message in messages %}
+    <p style="color:red;">{{ message }}</p>
+  {% endfor %}
+{% endif %}

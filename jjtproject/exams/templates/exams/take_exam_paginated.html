@@ -1,0 +1,201 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ current_exam.title }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/exam_style.css' %}">
+</head>
+<body>
+<div class="container mt-5 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">
+      <i class="fas fa-clipboard-list"></i> {{ current_exam.title }}
+    </h3>
+    <div class="timer badge bg-danger p-2" id="timer">00:00</div>
+
+  </div>
+
+  <div class="mb-3">
+    <span><i class="fas fa-list-ol"></i> Exam {{ exam_index }} of {{ total_exams }}</span> |
+    <span><i class="fas fa-hourglass-half"></i> Time Limit: {{ current_exam.time_limit_minutes }} min</span> |
+    <span><i class="fas fa-question-circle"></i> Total Questions: {{ questions|length }}</span>
+    <div class="progress mt-2">
+      <div class="progress-bar bg-success" role="progressbar" id="progressBar" style="width: {{ progress_percent }}%;">
+        {{ progress_percent }}%
+      </div>
+    </div>
+  </div>
+
+  {% if warning %}
+    <div class="alert alert-danger">{{ warning }}</div>
+  {% endif %}
+
+  <p class="text-danger fw-bold" id="unanswered-warning" style="display:none;"></p>
+
+  <form method="post" id="exam-form">
+    {% csrf_token %}
+    {% for question in questions %}
+      <div class="card mb-4 shadow-sm question-box">
+        <div class="card-body">
+          <p class="fw-semibold">{{ forloop.counter }}. 
+            {% if question.qtype == "mcqquestion" %}{{ question.question_text }}
+            {% else %}{{ question.text }}
+            {% endif %}
+          </p>
+
+          {% if question.qtype == "likertquestion" %}
+            <table class="table table-bordered likert-table">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 40%"></th>
+                  {% for val, label in likert_choices %}
+                    <th class="text-center">{{ label }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td></td>
+                  {% for val, label in likert_choices %}
+                    <td class="text-center">
+                      <input class="form-check-input" type="radio" name="q_{{ question.id }}" value="{{ val }}">
+                    </td>
+                  {% endfor %}
+                </tr>
+              </tbody>
+            </table>
+
+          {% elif question.qtype == "mcqquestion" %}
+            {% for choice in question.choices.all %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="q_{{ question.id }}" value="{{ choice.id }}">
+                <label class="form-check-label">{{ choice.choice_text }}</label>
+              </div>
+            {% endfor %}
+
+          {% elif question.qtype == "truefalsequestion" %}
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="q_{{ question.id }}" value="True">
+              <label class="form-check-label">True</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="q_{{ question.id }}" value="False">
+              <label class="form-check-label">False</label>
+            </div>
+
+          {% elif question.qtype == "essayquestion" %}
+            <textarea name="q_{{ question.id }}" rows="4" class="form-control" placeholder="Type your answer..." oninput="autoSaveEssay({{ question.id }})">{{ request.session|get_item:"essay_"|add:question.id }}</textarea>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary w-100">
+      {% if has_next %}Next Exam{% else %}Submit{% endif %}
+    </button>
+  </form>
+</div>
+
+<script>
+  let timeLeft = {{ current_exam.time_limit_minutes|default:2 }} * 60;
+
+  function autoSaveEssay(questionId) {
+    const textarea = document.querySelector(`textarea[name="q_${questionId}"]`);
+    const csrfToken = "{{ csrf_token }}";
+
+    fetch("{% url 'save_essay_answer' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken
+      },
+      body: JSON.stringify({
+        question_id: questionId,
+        answer: textarea.value
+      })
+    });
+  }
+
+  function autoSaveEssays() {
+    const essayFields = document.querySelectorAll("textarea");
+    essayFields.forEach(textarea => {
+      const qid = textarea.name.split("_")[1];
+      fetch("{% url 'save_essay_answer' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+          question_id: qid,
+          answer: textarea.value
+        })
+      });
+    });
+  }
+
+  function highlightUnanswered() {
+    const inputs = document.querySelectorAll("input[type=radio]");
+    const names = Array.from(new Set(Array.from(inputs).map(input => input.name)));
+
+    for (let name of names) {
+      const group = document.getElementsByName(name);
+      const answered = Array.from(group).some(input => input.checked);
+      if (!answered) {
+        group[0].closest('.question-box').classList.add('unanswered');
+      }
+    }
+
+    const essays = document.querySelectorAll("textarea");
+    essays.forEach(textarea => {
+      if (!textarea.value.trim()) {
+        textarea.classList.add('unanswered-textarea');
+        textarea.closest('.question-box').classList.add('unanswered');
+      }
+    });
+
+    const first = document.querySelector('.unanswered');
+    if (first) first.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function startTimer() {
+    const timerEl = document.getElementById("timer");
+    const form = document.getElementById("exam-form");
+
+    const countdown = setInterval(() => {
+      const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+      const seconds = String(timeLeft % 60).padStart(2, '0');
+      timerEl.textContent = `${minutes}:${seconds}`;
+
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        document.getElementById("unanswered-warning").innerText = "Time is up! Auto-submitting your answers.";
+        document.getElementById("unanswered-warning").style.display = "block";
+        highlightUnanswered();
+        autoSaveEssays();
+
+        setTimeout(() => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'auto_submit';
+          input.value = '1';
+          form.appendChild(input);
+          form.submit();
+        }, 3000);
+      }
+
+      timeLeft--;
+    }, 1000);
+  }
+
+  startTimer();
+</script>
+
+
+
+</body>
+</html>

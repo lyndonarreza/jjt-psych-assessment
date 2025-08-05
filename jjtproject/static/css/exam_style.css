@@ -1,0 +1,134 @@
+/* Import Google Fonts and FontAwesome */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h2, h4 {
+  font-weight: 600;
+  color: #222;
+}
+
+.timer {
+  font-size: 16px;
+  font-weight: 500;
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.progress {
+  height: 18px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  background-color: #198754;
+  transition: width 0.4s ease;
+}
+
+.question-box {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  transition: border 0.3s ease;
+}
+
+.question-box.unanswered {
+  border: 2px solid #dc3545;
+}
+
+input[type="radio"] {
+  margin-right: 8px;
+}
+
+textarea {
+  resize: vertical;
+  border-radius: 8px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+}
+
+button[type="submit"] {
+  background-color: #0d6efd;
+  border: none;
+  padding: 10px 28px;
+  color: white;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #0b5ed7;
+}
+
+.alert {
+  font-size: 15px;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.unanswered {
+  border: 2px solid #dc3545 !important;
+  box-shadow: 0 0 6px rgba(220, 53, 69, 0.6);
+}
+
+.unanswered-textarea {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+}
+
+/* Vanguard-style Likert horizontal layout */
+.likert-horizontal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.likert-horizontal .form-check {
+  flex: 1;
+  text-align: center;
+}
+
+.likert-horizontal input[type="radio"] {
+  display: block;
+  margin: 0 auto 6px;
+}
+
+.likert-horizontal label {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.question-text {
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 10px;
+}
