@@ -132,3 +132,19 @@ button[type="submit"]:hover {
   color: #222;
   margin-bottom: 10px;
 }
+
+label.form-check-label {
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+input[type="radio"]:focus,
+textarea:focus {
+  outline: 2px solid #0d6efd;
+  box-shadow: 0 0 4px rgba(13, 110, 253, 0.4);
+}
+
+.exam-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
