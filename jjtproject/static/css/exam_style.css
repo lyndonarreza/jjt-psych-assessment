@@ -110,20 +110,11 @@ textarea:focus {
 
 /* ────────────────────────────────────────────
    Likert (horizontal, clean & readable)
-   Use with: 
-   <div class="likert-horizontal">
-     <label>
-       <input type="radio" ...>
-       <span class="likert-text">Agree</span>
-     </label>
-     ...
-   </div>
    ──────────────────────────────────────────── */
-
 .likert-horizontal {
   display: flex;
   justify-content: center;
-  gap: 40px;            /* spacing between options */
+  gap: 30px;            /* spacing between options */
   padding: 12px 0;
   flex-wrap: wrap;      /* wraps nicely on smaller widths */
 }
@@ -132,7 +123,7 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: 10px;            /* space between radio and text */
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color .2s ease;
@@ -143,18 +134,110 @@ textarea:focus {
 }
 
 .likert-horizontal input[type="radio"] {
-  transform: scale(1.3);  /* larger click target */
+  transform: scale(1.3);  /* slightly larger click target */
   cursor: pointer;
 }
 
 .likert-text {
-  font-size: 1.05rem;   /* more readable */
+  font-size: 1rem;
   font-weight: 500;
   color: #222;
-  white-space: nowrap;  /* stay on one line per option */
+  white-space: nowrap;
 }
 
-/* Optional: highlight selected label (nice UX) */
-.likert-horizontal input[type="radio"]:checked + .likert-text::after {
-  content: '';
+.likert-horizontal label:last-child {
+  margin-right: 0;
+}
+
+
+/* Likert: horizontal row using .likert-option */
+.likert-row {
+  display: flex;
+  justify-content: center;   /* center the whole row */
+  align-items: center;
+  flex-wrap: wrap;           /* wrap on small screens */
+  gap: 28px;                 /* space between options */
+  padding: 10px 0;
+}
+
+.likert-option {
+  display: inline-flex;      /* make each option horizontal */
+  align-items: center;
+  gap: 10px;                 /* space between radio & label */
+  padding: 6px 10px;         /* a little breathing room */
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color .15s ease, box-shadow .15s ease;
+}
+.likert-option:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+
+.likert-option input[type="radio"] {
+  transform: scale(1.25);    /* larger click target */
+  margin: 0;
+  cursor: pointer;
+}
+
+.likert-text {
+  font-size: 1.05rem;
+  font-weight: 500;
+  white-space: nowrap;       /* keep “Strongly Agree” on one line */
+  color: #222;
+}
+
+
+/* --- Likert: Selected state + animations + responsive --- */
+
+/* Smooth interactions */
+.likert-option {
+  transition: background-color .2s ease, box-shadow .2s ease, transform .08s ease;
+}
+
+/* Hover lift */
+.likert-option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+
+/* Preferred modern highlight (Chrome, Edge, Safari, Firefox latest) */
+.likert-option:has(input[type="radio"]:checked) {
+  background-color: #e7f1ff;              /* soft blue */
+  border: 1px solid rgba(13,110,253,.25); /* subtle border */
+  box-shadow:
+    0 0 0 2px rgba(13,110,253,.12) inset,
+    0 2px 10px rgba(13,110,253,.08);
+}
+
+/* Emphasize label text when selected */
+.likert-option:has(input[type="radio"]:checked) .likert-text {
+  color: #0b5ed7;
+  font-weight: 600;
+}
+
+/* Fallback for older browsers: JS will add .is-selected */
+.likert-option.is-selected {
+  background-color: #e7f1ff;
+  border: 1px solid rgba(13,110,253,.25);
+  box-shadow:
+    0 0 0 2px rgba(13,110,253,.12) inset,
+    0 2px 10px rgba(13,110,253,.08);
+}
+.likert-option.is-selected .likert-text {
+  color: #0b5ed7;
+  font-weight: 600;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .likert-row { gap: 20px; }
+  .likert-option { padding: 6px 10px; }
+  .likert-text { font-size: 1rem; }
+}
+@media (max-width: 576px) {
+  .likert-row { justify-content: flex-start; gap: 14px; }
+  .likert-option { padding: 6px 8px; }
+  .likert-text { font-size: .98rem; }
 }

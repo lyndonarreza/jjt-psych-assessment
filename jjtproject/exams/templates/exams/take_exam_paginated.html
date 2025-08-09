@@ -46,26 +46,22 @@
 
 
           {% if question.qtype == "likertquestion" %}
-            <fieldset class="likert-group">
-              <legend class="visually-hidden">Likert for question {{ forloop.counter }}</legend>
-
-              
-            <div class="likert-horizontal">
+            <div class="likert-row" role="group" aria-label="Likert options for question {{ forloop.counter }}">
               {% for val, label in likert_choices %}
-                <label class="{% if unanswered %}unanswered{% endif %}">
+                <label class="likert-option">
                   <input
                     type="radio"
                     name="q_{{ question.id }}"
                     value="{{ val }}"
-                    class="likert-radio"
                     onchange="saveAnswerToLocalStorage({{ question.id }}, '{{ val }}')"
                     {% if request.session|get_item:"answer_"|add:question.id|stringformat:"s" == val %}checked{% endif %}>
                   <span class="likert-text">{{ label }}</span>
                 </label>
               {% endfor %}
             </div>
+
             <script>
-              (function(){
+              (function () {
                 const saved = localStorage.getItem("answer_{{ question.id }}");
                 if (saved) {
                   const r = document.querySelector(`input[name='q_{{ question.id }}'][value='${saved}']`);
@@ -73,8 +69,7 @@
                 }
               })();
             </script>
-
-
+          
             {# Short Answer Question #}
             {% elif question.qtype == "shortanswerquestion" %}
               <div class="form-group">
@@ -88,7 +83,6 @@
                   document.getElementById("q_{{ question.id }}").value = shortAnswerSaved_{{ question.id }};
                 }
               </script>
-
 
           {# MCQ Question #}
           {% elif question.qtype == "mcqquestion" %}
@@ -225,8 +219,6 @@ document.addEventListener('change', (e) => {
     }
   }
 });
-
-
 
 let timeLeft = {{ current_exam.time_limit_minutes|default:2 }};
 timeLeft = timeLeft > 0 ? timeLeft * 60 : null;
