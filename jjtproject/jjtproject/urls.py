@@ -28,6 +28,7 @@ urlpatterns = [
     path('', include('responses.urls')),
     # project/urls.py
     path('exams/', include('exams.urls')),
+    path("responses/", include("responses.urls")),
     
 
     

@@ -4,16 +4,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>{{ current_exam.title }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/exam_style.css' %}">
 </head>
 <body>
 <div class="container mt-5 mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="fw-bold">{{ current_exam.title }}</h3>
-    {% if current_exam.time_limit_minutes > 0 %}
+    {% if current_exam.time_limit_minutes|default:0 > 0 %}
       <div class="timer badge bg-danger p-2" id="timer">00:00</div>
     {% endif %}
   </div>
@@ -30,9 +31,8 @@
   </div>
 
   {% if warning %}
-    <div class="alert alert-danger">{{ warning }}</div>
+    <div class="alert alert-danger mb-3">{{ warning }}</div>
   {% endif %}
-
   <p class="text-danger fw-bold" id="unanswered-warning" style="display:none;"></p>
 
   <form method="post" id="exam-form">
@@ -40,99 +40,84 @@
     {% for question in questions %}
       <div class="card mb-4 shadow-sm question-box">
         <div class="card-body">
-          <p class="fw-semibold">{{ forloop.counter }}. {{ question.text }}</p>
+          <p class="fw-semibold mb-3">{{ forloop.counter }}. {{ question.text }}</p>
 
-          {# Likert Question #}
+          {# ───────────── Likert (Horizontal) ───────────── #}
+
+        {% if question.qtype == "likertquestion" %}
+          <div class="likert-row" role="group" aria-label="Likert options for question {{ forloop.counter }}">
+            {% for val, label in likert_choices %}
+              <label class="likert-option">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="q_{{ question.id }}"
+                  value="{{ val }}"
+                  onchange="saveAnswerToLocalStorage({{ question.id }}, '{{ val|escapejs }}')"
+                  {% if request.session|get_item:"answer_"|add:question.id|stringformat:"s" == val %}checked{% endif %}>
+                <span class="likert-text">{{ label }}</span>
+              </label>
+            {% endfor %}
+          </div>
 
 
-          {% if question.qtype == "likertquestion" %}
-            <div class="likert-row" role="group" aria-label="Likert options for question {{ forloop.counter }}">
-              {% for val, label in likert_choices %}
-                <label class="likert-option">
-                  <input
-                    type="radio"
-                    name="q_{{ question.id }}"
-                    value="{{ val }}"
-                    onchange="saveAnswerToLocalStorage({{ question.id }}, '{{ val }}')"
-                    {% if request.session|get_item:"answer_"|add:question.id|stringformat:"s" == val %}checked{% endif %}>
-                  <span class="likert-text">{{ label }}</span>
-                </label>
-              {% endfor %}
-            </div>
+         
 
-            <script>
-              (function () {
-                const saved = localStorage.getItem("answer_{{ question.id }}");
-                if (saved) {
-                  const r = document.querySelector(`input[name='q_{{ question.id }}'][value='${saved}']`);
-                  if (r) r.checked = true;
-                }
-              })();
-            </script>
-          
-            {# Short Answer Question #}
-            {% elif question.qtype == "shortanswerquestion" %}
-              <div class="form-group">
-                <label for="q_{{ question.id }}">Your Answer:</label>
-                <input type="text" name="q_{{ question.id }}" id="q_{{ question.id }}" class="form-control"
-                  placeholder="Type your answer..." oninput="saveAnswerToLocalStorage({{ question.id }}, this.value)">
-              </div>
-              <script>
-                const shortAnswerSaved_{{ question.id }} = localStorage.getItem("answer_{{ question.id }}");
-                if (shortAnswerSaved_{{ question.id }}) {
-                  document.getElementById("q_{{ question.id }}").value = shortAnswerSaved_{{ question.id }};
-                }
-              </script>
-
-          {# MCQ Question #}
+          {# ───────────── MCQ ───────────── #}
           {% elif question.qtype == "mcqquestion" %}
             {% for choice in question.choices.all %}
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="q_{{ question.id }}" value="{{ choice.id }}"
-                  id="q_{{ question.id }}_{{ forloop.counter }}"
-                  onchange="saveAnswerToLocalStorage({{ question.id }}, '{{ choice.id }}')">
-                <label class="form-check-label" for="q_{{ question.id }}_{{ forloop.counter }}">{{ choice.choice_text }}</label>
+              <div class="form-check mb-1">
+                <input
+                  class="form-check-input"
+                  id="q{{ question.id }}_c{{ forloop.counter }}"
+                  type="radio"
+                  name="q_{{ question.id }}"
+                  value="{{ choice.id }}"
+                  onchange="saveAnswerToLocalStorage({{ question.id }}, '{{ choice.id }}')"
+                  {% if request.session|get_item:"answer_"|add:question.id|stringformat:"s" == choice.id|stringformat:"s" %}checked{% endif %}
+                >
+                <label class="form-check-label" for="q{{ question.id }}_c{{ forloop.counter }}">{{ choice.choice_text }}</label>
               </div>
             {% endfor %}
-            <script>
-              const mcqSaved_{{ question.id }} = localStorage.getItem("answer_{{ question.id }}");
-              if (mcqSaved_{{ question.id }}) {
-                const mcqRadio = document.querySelector(`input[name='q_{{ question.id }}'][value='${mcqSaved_{{ question.id }}}']`);
-                if (mcqRadio) mcqRadio.checked = true;
-              }
-            </script>
 
-          {# True/False Question #}
+          {# ───────────── True / False ───────────── #}
           {% elif question.qtype == "truefalsequestion" %}
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="q_{{ question.id }}" value="True"
-                id="q_{{ question.id }}_true"
-                onchange="saveAnswerToLocalStorage({{ question.id }}, 'True')">
-              <label class="form-check-label" for="q_{{ question.id }}_true">True</label>
+            <div class="form-check mb-1">
+              <input
+                class="form-check-input"
+                id="q{{ question.id }}_true"
+                type="radio"
+                name="q_{{ question.id }}"
+                value="True"
+                onchange="saveAnswerToLocalStorage({{ question.id }}, 'True')"
+                {% if request.session|get_item:"answer_"|add:question.id|stringformat:"s" == "True" %}checked{% endif %}
+              >
+              <label class="form-check-label" for="q{{ question.id }}_true">True</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="q_{{ question.id }}" value="False"
-                id="q_{{ question.id }}_false"
-                onchange="saveAnswerToLocalStorage({{ question.id }}, 'False')">
-              <label class="form-check-label" for="q_{{ question.id }}_false">False</label>
+              <input
+                class="form-check-input"
+                id="q{{ question.id }}_false"
+                type="radio"
+                name="q_{{ question.id }}"
+                value="False"
+                onchange="saveAnswerToLocalStorage({{ question.id }}, 'False')"
+                {% if request.session|get_item:"answer_"|add:question.id|stringformat:"s" == "False" %}checked{% endif %}
+              >
+              <label class="form-check-label" for="q{{ question.id }}_false">False</label>
             </div>
-            <script>
-              const tfSaved_{{ question.id }} = localStorage.getItem("answer_{{ question.id }}");
-              if (tfSaved_{{ question.id }}) {
-                const tfRadio = document.querySelector(`input[name='q_{{ question.id }}'][value='${tfSaved_{{ question.id }}}']`);
-                if (tfRadio) tfRadio.checked = true;
-              }
-            </script>
 
-          {# Essay Question #}
+          {# ───────────── Essay ───────────── #}
           {% elif question.qtype == "essayquestion" %}
-            <label for="q_{{ question.id }}">Essay Answer:</label>
-            <textarea name="q_{{ question.id }}" id="q_{{ question.id }}" rows="4" class="form-control"
-              placeholder="Type your answer..." oninput="autoSaveEssay({{ question.id }})"></textarea>
-            <script>
-              const restoredEssay_{{ question.id }} = localStorage.getItem("answer_{{ question.id }}") || `{{ request.session|get_item:"answer_"|add:question.id|stringformat:"s" }}`;
-              if (restoredEssay_{{ question.id }}) document.getElementById("q_{{ question.id }}").value = restoredEssay_{{ question.id }};
-            </script>
+            <label class="form-label" for="q_{{ question.id }}">Essay Answer</label>
+            <textarea
+              class="form-control"
+              id="q_{{ question.id }}"
+              name="q_{{ question.id }}"
+              rows="4"
+              placeholder="Type your answer..."
+              oninput="autoSaveEssay({{ question.id }})"
+            >{{ request.session|get_item:"answer_"|add:question.id|stringformat:"s" }}</textarea>
           {% endif %}
         </div>
       </div>
@@ -145,112 +130,146 @@
 </div>
 
 <script>
-function saveAnswerToLocalStorage(qid, value) {
-  localStorage.setItem("answer_" + qid, value);
-}
+  // --- Timer (only if > 0 minutes) ---
+  (function(){
+    const minutesCfg = Number('{{ current_exam.time_limit_minutes|default:0 }}');
+    const hasTimer = minutesCfg > 0;
+    if (!hasTimer) return;
 
-function autoSaveEssay(questionId) {
-  const textarea = document.querySelector(`textarea[name="q_${questionId}"]`);
-  localStorage.setItem("answer_" + questionId, textarea.value);
-  fetch("{% url 'save_essay_answer' %}", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": "{{ csrf_token }}"
-    },
-    body: JSON.stringify({
-      question_id: questionId,
-      answer: textarea.value
-    })
-  });
-}
+    let timeLeft = minutesCfg * 60;
+    const timerEl = document.getElementById('timer');
+    const form = document.getElementById('exam-form');
 
-function highlightUnanswered() {
-  // clear previous flags
-  document.querySelectorAll('.question-box').forEach(b => b.classList.remove('unanswered'));
+    const tick = setInterval(() => {
+      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+      const s = String(timeLeft % 60).padStart(2, '0');
+      if (timerEl) timerEl.textContent = `${m}:${s}`;
 
-  // radio groups (MCQ/TF/Likert)
-  const radioGroups = [...new Set([...document.querySelectorAll('input[type=radio]')].map(r => r.name))];
-  radioGroups.forEach(name => {
-    const group = document.getElementsByName(name);
-    const answered = [...group].some(r => r.checked);
-    if (!answered && group.length) {
-      group[0].closest('.question-box').classList.add('unanswered');
-    }
-  });
+      if (timeLeft <= 0) {
+        clearInterval(tick);
+        const warn = document.getElementById('unanswered-warning');
+        if (warn) {
+          warn.textContent = "Time is up! Auto-submitting your answers.";
+          warn.style.display = "block";
+        }
+        highlightUnanswered();
+        autoSaveEssays();
+        setTimeout(() => {
+          const hidden = document.createElement('input');
+          hidden.type = 'hidden';
+          hidden.name = 'auto_submit';
+          hidden.value = '1';
+          form.appendChild(hidden);
+          form.submit();
+        }, 2000);
+      }
+      timeLeft--;
+    }, 1000);
+  })();
 
-   // essays
-  document.querySelectorAll('textarea').forEach(t => {
-    if (!t.value.trim()) {
-      t.closest('.question-box').classList.add('unanswered');
-      t.classList.add('unanswered-textarea');
-    } else {
-      t.classList.remove('unanswered-textarea');
-    }
-  });
+  // --- Highlight unanswered (for warning state) ---
+  function highlightUnanswered() {
+    // radios
+    const radios = document.querySelectorAll('input[type="radio"]');
+    const byName = {};
+    radios.forEach(r => {
+      byName[r.name] = byName[r.name] || [];
+      byName[r.name].push(r);
+    });
+    Object.keys(byName).forEach(name => {
+      const group = byName[name];
+      const anyChecked = group.some(r => r.checked);
+      if (!anyChecked) {
+        const box = group[0].closest('.question-box');
+        if (box) box.classList.add('unanswered');
+      }
+    });
 
-  const first = document.querySelector('.unanswered');
-  const banner = document.getElementById('unanswered-warning');
+    // essays
+    document.querySelectorAll('textarea').forEach(t => {
+      if (!t.value.trim()) {
+        t.classList.add('unanswered-textarea');
+        const box = t.closest('.question-box');
+        if (box) box.classList.add('unanswered');
+      }
+    });
 
-  if (first) {
-    banner.textContent = 'You have unanswered questions. Please complete them before continuing.';
-    banner.style.display = 'block';
-    first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return true; // has unanswered
-  } else {
-    banner.style.display = 'none';
-    return false;
+    const first = document.querySelector('.unanswered');
+    if (first) first.scrollIntoView({ behavior: 'smooth' });
   }
-}
 
-
-// Block submit if anything is missing
-document.getElementById('exam-form').addEventListener('submit', (e) => {
-  if (highlightUnanswered()) e.preventDefault();
-});
-
-// Clear red state as the user answers
-document.addEventListener('change', (e) => {
-  if (e.target.matches('input[type=radio]') || e.target.matches('textarea')) {
-    const box = e.target.closest('.question-box');
-    box?.classList.remove('unanswered');
-    if (!highlightUnanswered()) {
-      document.getElementById('unanswered-warning').style.display = 'none';
+  // --- Save helpers (GLOBAL so inline handlers can call them) ---
+  window.saveAnswerToLocalStorage = function(qid, value) {
+    try {
+      localStorage.setItem('answer_' + qid, String(value));
+      // Optional: also mirror to session via existing endpoint
+      fetch("{% url 'save_essay_answer' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ question_id: qid, answer: String(value) })
+      }).catch(()=>{});
+    } catch (e) {
+      console.error('saveAnswerToLocalStorage failed:', e);
     }
+  };
+
+  function autoSaveEssay(qid) {
+    const ta = document.querySelector(`textarea[name="q_${qid}"]`);
+    if (!ta) return;
+    const val = ta.value;
+    localStorage.setItem('answer_' + qid, val);
+    fetch("{% url 'save_essay_answer' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({ question_id: qid, answer: val })
+    }).catch(()=>{});
   }
-});
 
-let timeLeft = {{ current_exam.time_limit_minutes|default:2 }};
-timeLeft = timeLeft > 0 ? timeLeft * 60 : null;
+  function autoSaveEssays() {
+    document.querySelectorAll('textarea').forEach(ta => {
+      const qid = (ta.name.split('_')[1] || '').trim();
+      if (!qid) return;
+      const val = ta.value;
+      localStorage.setItem('answer_' + qid, val);
+      fetch("{% url 'save_essay_answer' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ question_id: qid, answer: val })
+      }).catch(()=>{});
+    });
+  }
 
-function startTimer() {
-  if (timeLeft === null) return;
-  const timerEl = document.getElementById("timer");
-  const form = document.getElementById("exam-form");
+  // --- Restore answers from localStorage on load (works for radios & essays) ---
+  document.addEventListener('DOMContentLoaded', () => {
+    // Radios
+    document.querySelectorAll('input[type="radio"]').forEach(r => {
+      const qid = (r.name.split('_')[1] || '').trim();
+      const saved = localStorage.getItem('answer_' + qid);
+      if (saved != null && saved !== '') {
+        if (r.value == saved) r.checked = true;
+      }
+    });
+    // Essays
+    document.querySelectorAll('textarea').forEach(ta => {
+      const qid = (ta.name.split('_')[1] || '').trim();
+      const saved = localStorage.getItem('answer_' + qid);
+      if (saved != null) ta.value = saved;
+    });
 
-  const countdown = setInterval(() => {
-    const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-    const seconds = String(timeLeft % 60).padStart(2, '0');
-    if (timerEl) timerEl.textContent = `${minutes}:${seconds}`;
-
-    if (timeLeft <= 0) {
-      clearInterval(countdown);
-      document.getElementById("unanswered-warning").innerText = "Time is up! Auto-submitting your answers.";
-      document.getElementById("unanswered-warning").style.display = "block";
-      setTimeout(() => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'auto_submit';
-        input.value = '1';
-        form.appendChild(input);
-        form.submit();
-      }, 3000);
-    }
-    timeLeft--;
-  }, 1000);
-}
-
-startTimer();
+    {% if warning %}
+      // If server asked to warn, show unanswered marks
+      highlightUnanswered();
+    {% endif %}
+  });
 </script>
 </body>
 </html>

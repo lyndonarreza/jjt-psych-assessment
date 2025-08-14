@@ -1,10 +1,15 @@
+# responses/forms.py
 from django import forms
-from .models import ExamineeProfile
+from .models import Answer, ExamAttempt
 
-class ExamineeProfileForm(forms.ModelForm):
+class AnswerForm(forms.ModelForm):
     class Meta:
-        model = ExamineeProfile
-        fields = ['fullname', 'gender', 'birthdate', 'civil_status', 'education', 'position', 'company']
-        widgets = {
-            'birthdate': forms.DateInput(attrs={'type': 'date'}),
-        }
+        model = Answer
+        fields = ["attempt", "examinee", "exam", "question_id", "qtype",
+                  "mcq_choice_id", "likert_value", "truefalse_value", "essay_text", "raw_value"]
+
+class ExamAttemptForm(forms.ModelForm):
+    class Meta:
+        model = ExamAttempt
+        fields = ["examinee", "exam", "attempt_number", "status", "started_at", "submitted_at",
+                  "raw_score", "scaled_score", "duration_seconds", "metadata"]
