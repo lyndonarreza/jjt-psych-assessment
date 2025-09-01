@@ -1,0 +1,79 @@
+{% extends "exams/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <h4 class="mb-3">Dashboard</h4>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+      <i class="bi bi-bar-chart-line me-2"></i>SUMMARY
+    </div>
+
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Today -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex">
+              <div class="me-3" style="font-size:28px;">📊</div>
+              <div class="flex-grow-1">
+                <div class="text-success fw-semibold">Today</div>
+                <div class="display-5">{{ summary.today|default_if_none:"0" }}</div>
+                <a class="btn btn-sm btn-outline-success mt-2"
+                   href="{% url 'dashboard_reports' %}?quick=today">View Details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Yesterday -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex">
+              <div class="me-3" style="font-size:28px;">📊</div>
+              <div class="flex-grow-1">
+                <div class="text-primary fw-semibold">Yesterday</div>
+                <div class="display-5">{{ summary.yesterday|default_if_none:"0" }}</div>
+                <a class="btn btn-sm btn-outline-primary mt-2"
+                   href="{% url 'dashboard_reports' %}?quick=yesterday">View Details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last 7 Days -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex">
+              <div class="me-3" style="font-size:28px;">📊</div>
+              <div class="flex-grow-1">
+                <div class="text-warning fw-semibold">Last 7 Days</div>
+                <div class="display-5">{{ summary.last7|default_if_none:"0" }}</div>
+                <a class="btn btn-sm btn-outline-warning mt-2"
+                   href="{% url 'dashboard_reports' %}?quick=last7">View Details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last 30 Days -->
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex">
+              <div class="me-3" style="font-size:28px;">📊</div>
+              <div class="flex-grow-1">
+                <div class="text-danger fw-semibold">Last 30 Days</div>
+                <div class="display-5">{{ summary.last30|default_if_none:"0" }}</div>
+                <a class="btn btn-sm btn-outline-danger mt-2"
+                   href="{% url 'dashboard_reports' %}?quick=last30">View Details</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- /row -->
+    </div>
+  </div>
+</div>
+{% endblock %}

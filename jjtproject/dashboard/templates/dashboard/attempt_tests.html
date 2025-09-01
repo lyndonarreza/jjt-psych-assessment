@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h4>Attempt Details</h4>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div><strong>Examinee:</strong> {{ attempt.user.get_full_name|default:attempt.user.username }}</div>
+      <div><strong>Exam:</strong> {{ attempt.exam }}</div>
+      <div><strong>Progress:</strong> {{ attempt.progress|default:0|floatformat:0 }}%</div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    {% if taken_tests and taken_tests|length %}
+      <ul class="list-group">
+        {% for t in taken_tests %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ t.name }}</span>
+            <span class="badge bg-secondary">{{ t.score }}%</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="text-muted">No per-test breakdown available yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

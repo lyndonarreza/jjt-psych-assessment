@@ -29,6 +29,8 @@ urlpatterns = [
     # project/urls.py
     path('exams/', include('exams.urls')),
     path("responses/", include("responses.urls")),
+    path("clientadmin/", include("dashboard.urls")),  # dashboard lives here
+   
     
 
     

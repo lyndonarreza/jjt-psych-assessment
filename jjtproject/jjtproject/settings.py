@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'exams',
     'responses',
     'django_extensions',  # ✅ Add this
+    'dashboard',
 ]
 
 MIDDLEWARE = [

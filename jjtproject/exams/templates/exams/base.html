@@ -1,22 +1,73 @@
 {% load static %}
+{% load custom_filters %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Exam System</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Exam System TESTing</title>
 
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
 
   <!-- Your custom styles (optional) -->
-  <link rel="stylesheet" href="{% static 'css/exam_style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/exam_style.css' %}" />
 
-  <!-- Bootstrap JS (optional, if you need dropdowns, modals, etc.) -->
+  <!-- Bootstrap JS (dropdowns, modals, navbar) -->
   <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+  
 </head>
 <body>
-  {% block content %}
-  <!-- Content from child templates will appear here -->
-  {% endblock %}
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">My Exam System</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+
+          {% if request.user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'list_exams' %}">Exams</a>
+            </li>
+
+            {% if request.user.is_staff or request.user|has_group:"ClientAdmin" %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'dashboard_home' %}">Dashboard</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'dashboard_reports' %}">Reports</a>
+              </li>
+            {% endif %}
+
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Examinee Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'staff_login' %}">Admin Login</a>
+            </li>
+          {% endif %}
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main page content -->
+  <div class="container">
+    {% block content %}
+    <!-- Content from child templates will appear here -->
+    {% endblock %}
+  </div>
+
 </body>
 </html>
